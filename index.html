@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delicias Sonorenses Colibrí de Rosario Rodriguez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #b45309; /* Broader definition for primary color */
+            --secondary: #f59e0b;
+            --accent: #ca8a04;
+            --light: #fdfbf5;
+            --dark: #4e443a;
+            /* --colibri-accent: #14b8a6; /* Tailwind teal-500 - can be defined here if used extensively in custom CSS */
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="%23fef3c7" stroke-width="0.5" opacity="0.3"/></svg>');
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://i.imgur.com/jL01ugh.jpeg'); /* Using existing hero image */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            border-radius: 16px; /* Tailwind: rounded-2xl */
+            box-shadow: 0 10px 20px rgba(180, 83, 9, 0.1); /* Tailwind: shadow-lg with custom color */
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(180, 83, 9, 0.2); /* Tailwind: shadow-xl with custom color */
+        }
+        
+        .card-image {
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .card:hover .card-image {
+            transform: scale(1.05);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(253, 251, 245, 0) 60%, rgba(253, 251, 245, 0.95) 90%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #ffedd5 100%);
+            border-radius: 16px; /* rounded-2xl */
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(180, 83, 9, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(180, 83, 9, 0.15);
+        }
+        
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 380px; /* Adjusted for better radar chart display */
+        }
+        
+        .nav-link {
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(180, 83, 9, 0.4);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(180, 83, 9, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(180, 83, 9, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(180, 83, 9, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(180, 83, 9, 0); }
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3; /* light grey */
+            border-top: 4px solid var(--primary); /* primary color */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 5px auto; /* Adjusted margin for better centering */
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .btn-primary:hover::after {
+            left: 100%;
+        }
+        .btn-whatsapp { /* New style for WhatsApp button */
+            background: linear-gradient(to right, #25D366, #128C7E); /* WhatsApp green */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-whatsapp::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.6s ease;
+        }
+        .btn-whatsapp:hover::after {
+            left: 100%;
+        }
+
+        .pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23fef3c7' fill-opacity='0.3' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Floating Action Button for Contact -->
+    <a href="#contacto" class="floating-action" aria-label="Ir a la sección de contacto">
+        <i class="fas fa-phone-alt text-xl"></i>
+    </a>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-md fixed w-full z-50 top-0">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo and Site Title -->
+                <div class="flex items-center">
+                     <a href="#" class="text-2xl font-bold text-amber-900 flex items-center">Delicias Sonorenses <span class="ml-2 text-teal-500 font-semibold">Colibrí</span><i class="fas fa-hummingbird text-2xl ml-2 text-teal-500"></i></a>
+                </div>
+                <!-- Desktop Navigation Links -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#dulces" class="nav-link text-amber-900 font-medium">Dulces</a>
+                    <a href="#comparador" class="nav-link text-amber-900 font-medium">Comparador</a>
+                    <a href="#gemini-gift-basket" class="nav-link text-amber-900 font-medium">Canastas</a>
+                    <a href="#tradicion" class="nav-link text-amber-900 font-medium">Tradición</a>
+                    <a href="#contacto" class="nav-link text-amber-900 font-medium">Contacto</a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-amber-900" aria-label="Abrir menú móvil">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white py-4 px-4 absolute w-full shadow-lg">
+            <a href="#dulces" class="block py-2 text-amber-900 font-medium">Dulces</a>
+            <a href="#comparador" class="block py-2 text-amber-900 font-medium">Comparador</a>
+            <a href="#gemini-gift-basket" class="block py-2 text-amber-900 font-medium">Canastas</a>
+            <a href="#tradicion" class="block py-2 text-amber-900 font-medium">Tradición</a>
+            <a href="#contacto" class="block py-2 text-amber-900 font-medium">Contacto</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center py-32 px-4 relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-amber-900/30"></div>
+        <div class="relative z-10 max-w-3xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
+                Delicias <span class="text-amber-300">Sonorenses</span> <span class="text-teal-400">Colibrí</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-amber-100 mb-8 drop-shadow-md max-w-2xl mx-auto">
+                Por Rosario Rodriguez - Endulzando Hermosillo con el sabor auténtico de nuestra tierra
+            </p>
+            <a href="#dulces" class="btn-primary text-white font-bold py-4 px-10 rounded-full shadow-xl inline-block text-lg">
+                Descubre Nuestros Dulces <i class="fas fa-arrow-down ml-2"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 py-16 pt-28">
+        <!-- Introductory Section with Features -->
+        <section class="mb-24 text-center">
+            <div class="max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">Sabores que Cuentan Historias</h2>
+                <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                <p class="text-lg text-gray-700">Cada dulce es una expresión de nuestra tradición y amor por la repostería artesanal. Descubre el sabor auténtico de Sonora en cada bocado.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                <!-- Feature Card 1: Local Ingredients -->
+                <div class="feature-card p-8">
+                    <div class="text-amber-600 text-5xl mb-6">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-amber-800">Ingredientes Locales</h3>
+                    <p class="text-gray-600">Usamos piloncillo, maíz y frutas de la región para garantizar un sabor auténtico.</p>
+                </div>
+                
+                <!-- Feature Card 2: Handmade -->
+                <div class="feature-card p-8">
+                    <div class="text-amber-600 text-5xl mb-6">
+                        <i class="fas fa-hands"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-amber-800">Hechos a Mano</h3>
+                    <p class="text-gray-600">Cada dulce es preparado con dedicación para asegurar la calidad que nos distingue.</p>
+                </div>
+                
+                <!-- Feature Card 3: Ideal for Gifting -->
+                <div class="feature-card p-8">
+                    <div class="text-amber-600 text-5xl mb-6">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-amber-800">Ideal para Regalar</h3>
+                    <p class="text-gray-600">Sorprende a tus seres queridos con una canasta de dulces sonorenses.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dulces Section -->
+        <section id="dulces" class="mb-24">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">Nuestros Dulces Estrella</h2>
+                <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                <p class="text-lg text-gray-700">Cada uno de nuestros dulces es elaborado de forma artesanal, siguiendo recetas que han pasado de generación en generación. Te invitamos a explorar nuestra selección.</p>
+            </div>
+            <!-- Grid for displaying dulce cards -->
+            <div id="dulces-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Dulce cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Comparador Section (Flavor Comparator) -->
+        <section id="comparador" class="mb-24 pattern py-16 rounded-2xl">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">Compara Nuestros Sabores</h2>
+                    <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                    <p class="text-lg text-gray-700">¿Buscas algo crujiente o suave? ¿Muy dulce o con un toque salado? Nuestra gráfica interactiva te ayuda a encontrar el dulce perfecto para tu antojo.</p>
+                </div>
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+                    <!-- Chart container for displaying flavor profiles -->
+                    <div class="chart-container">
+                        <canvas id="dulcesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gemini Gift Basket Name Generator Section -->
+        <section id="gemini-gift-basket" class="mb-24">
+            <div class="max-w-4xl mx-auto bg-gradient-to-r from-amber-50 to-yellow-50 p-8 rounded-2xl shadow-lg">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">✨ Inspírate para tu Canasta de Regalo ✨</h2>
+                    <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                    <p class="text-lg text-gray-700 max-w-2xl mx-auto">¿No sabes qué nombre ponerle a tu canasta? Describe la ocasión o los dulces y la IA (simulada) te dará ideas creativas.</p>
+                </div>
+                <div class="max-w-xl mx-auto">
+                    <!-- Input for keywords -->
+                    <div class="relative mb-4">
+                        <input type="text" id="gift-basket-keywords" placeholder="Ej: Cumpleaños, chocolate, tradicional" class="w-full p-4 border border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent shadow-sm">
+                        <i class="fas fa-gift absolute right-4 top-4 text-amber-500"></i>
+                    </div>
+                    <!-- Button to generate names -->
+                    <button id="generate-basket-name-button" class="btn-primary text-white font-bold py-4 px-8 rounded-xl shadow-md hover:shadow-lg transition-all w-full">
+                        Generar Nombres para Canasta
+                    </button>
+                    <!-- Loader and suggestions area -->
+                    <div id="basket-name-loader" class="loader hidden mt-6"></div>
+                    <div id="basket-name-suggestions" class="mt-6 bg-white p-6 rounded-xl shadow-inner">
+                        <!-- AI-generated basket name suggestions will appear here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gemini Thematic Basket Content Suggester Section -->
+        <section id="gemini-thematic-basket" class="mb-24">
+            <div class="max-w-4xl mx-auto bg-gradient-to-r from-amber-50 to-orange-50 p-8 rounded-2xl shadow-lg">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">✨ Arma tu Canasta Temática con IA ✨</h2>
+                    <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                    <p class="text-lg text-gray-700 max-w-2xl mx-auto">Dinos el tema u ocasión para tu canasta y la IA (simulada) te sugerirá qué dulces incluir para crear la combinación perfecta.</p>
+                </div>
+                <div class="max-w-xl mx-auto">
+                    <!-- Input for theme/occasion -->
+                    <div class="relative mb-4">
+                        <input type="text" id="thematic-basket-theme" placeholder="Ej: Detalle romántico, antojo chocolatoso" class="w-full p-4 border border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent shadow-sm">
+                        <i class="fas fa-lightbulb absolute right-4 top-4 text-amber-500"></i>
+                    </div>
+                    <!-- Button to suggest content -->
+                    <button id="suggest-basket-content-button" class="btn-primary text-white font-bold py-4 px-8 rounded-xl shadow-md hover:shadow-lg transition-all w-full bg-gradient-to-r from-amber-600 to-amber-700">
+                        Sugerir Dulces para Canasta
+                    </button>
+                    <!-- Loader and suggestions area -->
+                    <div id="thematic-basket-loader" class="loader hidden mt-6"></div>
+                    <div id="thematic-basket-suggestions" class="mt-6 bg-white p-6 rounded-xl shadow-inner">
+                        <!-- AI-generated thematic basket content suggestions will appear here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tradición Section (Tradition and Quality) -->
+        <section id="tradicion" class="mb-24">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-amber-900 mb-4">Calidad y Tradición en Cada Bocado</h2>
+                <div class="h-1 w-24 bg-amber-500 mx-auto mb-6"></div>
+                <p class="text-lg text-gray-700">Nuestro secreto es simple: usamos ingredientes de la mejor calidad y el cariño de una receta casera. Creemos en el valor de lo auténtico y artesanal para ofrecerte una experiencia de sabor inolvidable.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Image related to Sonoran baking tradition -->
+                <div>
+                    <img src="https://placehold.co/600x450/fef3c7/b45309?text=Cocina+Tradicional+Sonorense" alt="Imagen de la tradición repostera sonorense" class="rounded-xl shadow-lg w-full h-96 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x450/EEEEEE/BDBDBD?text=Imagen+No+Disponible';">
+                </div>
+                <!-- Text content about history and founder -->
+                <div>
+                    <h3 class="text-3xl font-bold mb-6 text-amber-800">Nuestra Historia</h3>
+                    <p class="text-gray-600 mb-6">Desde 1995, Rosario Rodriguez ha estado endulzando los corazones de Hermosillo con sus recetas tradicionales. Lo que comenzó como un pequeño emprendimiento familiar hoy es un referente de la repostería sonorense.</p>
+                    <p class="text-gray-600 mb-6">Cada dulce es elaborado con técnicas tradicionales que hemos perfeccionado a lo largo de los años, respetando siempre los sabores auténticos de nuestra tierra.</p>
+                    <div class="flex items-center">
+                        <div class="w-16 h-16 rounded-full overflow-hidden border-4 border-amber-300 mr-4">
+                             <img src="https://placehold.co/100x100/ffedd5/4e443a?text=Rosario" alt="Foto de Rosario Rodriguez" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/EEEEEE/BDBDBD?text=R';">
+                        </div>
+                        <div>
+                            <p class="font-bold text-amber-900">Rosario Rodriguez</p>
+                            <p class="text-gray-600">Fundadora y Maestra Repostera</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer and Contact Section -->
+    <footer id="contacto" class="bg-gradient-to-r from-amber-800 to-amber-900 text-white py-20 px-4 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pattern"></div>
+        <div class="relative z-10">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">¿Listo para tu Pedido?</h2>
+                <div class="h-1 w-24 bg-amber-400 mx-auto mb-8"></div>
+                <p class="text-xl mb-10 text-amber-100 max-w-2xl mx-auto">Contáctame directamente para hacer tu pedido, consultar sobre nuestros productos o preparar una canasta de regalo personalizada.</p>
+                
+                <!-- Contact Information Card -->
+                <div class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl inline-block max-w-md w-full">
+                    <p class="text-2xl font-bold mb-2">Rosario Rodriguez</p>
+                    <div class="mt-6 space-y-4">
+                        <!-- Phone Number -->
+                        <a href="tel:+526621008563" id="phone-number-link" class="block text-3xl font-bold tracking-wider mb-2 hover:text-amber-300 transition-colors">
+                            <span id="phone-number-text">+52 662 100 8563</span>
+                        </a>
+                        
+                        <!-- Copy Phone Number Button -->
+                        <button id="copy-button" class="bg-amber-500 text-white font-bold py-3 px-8 rounded-full hover:bg-amber-600 transition-colors duration-300 shadow-lg w-full sm:w-auto">
+                            <i class="fas fa-copy mr-2"></i> Copiar Teléfono
+                        </button>
+                        <p id="copy-feedback" class="mt-3 text-amber-200 h-6"></p> <!-- Feedback message for copy action -->
+
+                        <!-- WhatsApp Chat Button -->
+                        <a href="https://wa.me/5216621008563?text=Hola%20Rosario,%20estoy%20interesado%20en%20sus%20Delicias%20Sonorenses%20Colibrí." target="_blank" rel="noopener noreferrer" class="btn-whatsapp text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto inline-block">
+                            <i class="fab fa-whatsapp mr-2"></i> Chatear por WhatsApp
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Social Media Links -->
+                <div class="mt-16 flex justify-center space-x-6">
+                    <a href="https://facebook.com/deliciassonorensesrosario" target="_blank" rel="noopener noreferrer" class="text-amber-200 hover:text-white text-2xl" aria-label="Facebook de Delicias Sonorenses Colibrí">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://instagram.com/deliciassonorensesrosario" target="_blank" rel="noopener noreferrer" class="text-amber-200 hover:text-white text-2xl" aria-label="Instagram de Delicias Sonorenses Colibrí">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/5216621008563?text=Hola%20Rosario!" target="_blank" rel="noopener noreferrer" class="text-amber-200 hover:text-white text-2xl" aria-label="WhatsApp de Delicias Sonorenses Colibrí">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for Dulce Details -->
+    <div id="modal" class="modal fixed inset-0 bg-black/80 flex justify-center items-center p-4 z-50">
+        <div id="modal-content" class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 relative">
+            <!-- Close Modal Button -->
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl" aria-label="Cerrar modal">&times;</button>
+            <!-- Modal Image -->
+            <img id="modal-image" src="https://placehold.co/600x400/EADCB4/4E443A?text=Imagen+del+Dulce" alt="[Imagen de Dulce]" class="w-full h-72 object-cover rounded-xl mb-6" onerror="this.onerror=null; this.src='https://placehold.co/600x400/EEEEEE/BDBDBD?text=Error+Cargando+Imagen';">
+            <!-- Modal Title -->
+            <h3 id="modal-title" class="text-3xl font-bold mb-4 text-amber-900"></h3>
+            <!-- Modal Description -->
+            <p id="modal-description" class="mb-6 text-gray-700 text-lg"></p>
+            
+            <!-- Appeal and Presentation Sections -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-amber-50 p-4 rounded-xl">
+                    <h4 class="text-xl font-bold text-amber-800 mb-2"><i class="fas fa-heart mr-2 text-amber-600"></i> ¿Por qué te encantará?</h4>
+                    <p id="modal-appeal" class="text-gray-700"></p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-xl">
+                    <h4 class="text-xl font-bold text-amber-800 mb-2"><i class="fas fa-gift mr-2 text-amber-600"></i> Ideal para...</h4>
+                    <p id="modal-presentation" class="text-gray-700"></p>
+                </div>
+            </div>
+            
+            <!-- Simulated AI Suggestion Buttons and Output Areas -->
+            <div class="space-y-4 mt-6">
+                <!-- Button for Pairing/Occasion Suggestions -->
+                <button id="gemini-suggestion-button" class="btn-primary text-white font-bold py-3 px-6 rounded-xl w-full text-base">
+                    <i class="fas fa-mug-hot mr-2"></i> Sugerir Maridaje y Ocasión (IA Simulado)
+                </button>
+                <div id="gemini-loader" class="loader hidden"></div>
+                <div id="gemini-suggestions" class="p-4 bg-amber-50 rounded-xl hidden text-gray-700">
+                    <!-- AI-generated pairing/occasion suggestions will appear here -->
+                </div>
+
+                <!-- Button for Legend/Story Suggestions -->
+                <button id="gemini-legend-button" class="btn-primary text-white font-bold py-3 px-6 rounded-xl w-full text-base bg-gradient-to-r from-amber-700 to-amber-800">
+                    <i class="fas fa-book mr-2"></i> Descubre la Leyenda (IA Simulado)
+                </button>
+                <div id="gemini-legend-loader" class="loader hidden"></div>
+                <div id="gemini-legend" class="p-4 bg-orange-50 rounded-xl hidden text-gray-700">
+                    <!-- AI-generated legend/story will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for the Sonoran sweets
+        const dulcesData = [
+            {
+                name: "Ponteduros",
+                description: "Una golosina tradicional hecha con maíz reventado, similar a las palomitas, bañado en piloncillo derretido. Su nombre hace alusión a su deliciosa textura crujiente.",
+                appeal: "Un dulce sencillo y popular entre todas las edades. Su sabor a maíz tostado y piloncillo es inconfundible y te transportará a tu infancia.",
+                presentation: "Disfrutar como un snack a cualquier hora, en bolsitas individuales o conos de papel para compartir en fiestas y reuniones.",
+                scores: { "Crujiente": 5, "Suave": 1, "Intensidad Dulce": 3, "Tradicional": 5, "Textura Chiclosa": 1 },
+                imageUrl: "https://i.imgur.com/jLc8XO2.jpeg" 
+            },
+            {
+                name: "Pipitorias",
+                description: "Una barra energética elaborada con semillas de calabaza (pepitas) y cacahuates, todo unido por un caramelo de piloncillo que le da un toque crujiente. Similar a una palanqueta.",
+                appeal: "Es el snack perfecto para recargar energía. La combinación de semillas tostadas con el dulce del caramelo es simplemente adictiva.",
+                presentation: "Llevar contigo como una barra energética, o para picar entre comidas. Una opción saludable y deliciosa.",
+                scores: { "Crujiente": 5, "Suave": 1, "Intensidad Dulce": 4, "Tradicional": 4, "Textura Chiclosa": 2 },
+                imageUrl: "https://i.imgur.com/biRXFdJ.jpeg" 
+            },
+            {
+                name: "Coricos",
+                description: "Galletas de harina de maíz con una textura suave y arenosa que se deshacen en la boca. Un bizcocho tradicional con un toque de canela, a menudo en forma de rosquilla o espiral.",
+                appeal: "El acompañante perfecto para tu café de la mañana o el té de la tarde. Su sabor casero y tradicional es un apapacho al corazón.",
+                presentation: "Disfrutar en el desayuno o la merienda. Vienen en bolsitas de varias piezas, ideales para compartir.",
+                scores: { "Crujiente": 2, "Suave": 5, "Intensidad Dulce": 2, "Tradicional": 5, "Textura Chiclosa": 1 },
+                imageUrl: "https://i.imgur.com/ed3efw2.jpeg" 
+            },
+            {
+                name: "Empanadas",
+                description: "Un clásico de nuestra repostería. Suave masa de harina de trigo rellena de deliciosos dulces como cajeta, guayaba, piña o calabaza.",
+                appeal: "Su versatilidad las hace irresistibles. Con una gran variedad de rellenos, siempre hay una empanada para cada gusto.",
+                presentation: "Un postre individual o para llevar por charolas a tus eventos y reuniones familiares. ¡Siempre son un éxito!",
+                scores: { "Crujiente": 1, "Suave": 5, "Intensidad Dulce": 4, "Tradicional": 4, "Textura Chiclosa": 1 },
+                imageUrl: "https://i.imgur.com/V062cc4.jpeg" 
+            },
+            {
+                name: "Coyotas",
+                description: "El dulce sonorense más famoso. Una empanada plana y redonda con una masa delicada, tradicionalmente rellena de piloncillo, pero también disponible en otros sabores.",
+                appeal: "Un ícono de Sonora. La combinación de su masa hojaldrada o suave con el centro de dulce derretido es una experiencia que no te puedes perder.",
+                presentation: "Disfrutar calientitas con un vaso de leche o café. Vienen en cajas, perfectas para llevar como un regalo de Sonora.",
+                scores: { "Crujiente": 3, "Suave": 4, "Intensidad Dulce": 4, "Tradicional": 5, "Textura Chiclosa": 2 },
+                imageUrl: "https://i.imgur.com/jL01ugh.jpeg" 
+            },
+            {
+                name: "Cacahuates Garapiñados",
+                description: "Cacahuates tostados cubiertos con una capa crujiente de caramelo de azúcar, con un ligero toque de vainilla que los hace irresistibles.",
+                appeal: "Un snack adictivo que no podrás dejar de comer. El balance perfecto entre lo salado del cacahuate y el dulce del caramelo.",
+                presentation: "Comer mientras ves una película, en reuniones con amigos o simplemente para calmar un antojo.",
+                scores: { "Crujiente": 5, "Suave": 1, "Intensidad Dulce": 4, "Tradicional": 3, "Textura Chiclosa": 1 },
+                imageUrl: "https://i.imgur.com/tb6n7XB.jpeg" 
+            },
+            {
+                name: "Melcochas",
+                description: "Un dulce de piloncillo con una textura chiclosa única. Se estira y se dobla artesanalmente hasta lograr su consistencia perfecta, a menudo envuelto en papel.",
+                appeal: "Un dulce tradicional con un sabor intenso a piloncillo y una textura muy divertida. A veces se le añaden nueces para un toque extra.",
+                presentation: "Disfrutar en pequeños trozos. Una golosina clásica que te hará recordar los sabores de antes.",
+                scores: { "Crujiente": 1, "Suave": 2, "Intensidad Dulce": 5, "Tradicional": 4, "Textura Chiclosa": 5 },
+                imageUrl: "https://i.imgur.com/Yx4oQT3.jpeg" 
+            }
+        ];
+
+        let currentDulceForGemini = null; // To store the dulce selected in the modal for AI features
+
+        // Event listener for when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            // Toggle mobile menu visibility
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when a link inside it is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Populate the grid with dulce cards
+            const grid = document.getElementById('dulces-grid');
+            dulcesData.forEach(dulce => {
+                const card = document.createElement('div');
+                card.className = 'card cursor-pointer'; // Added cursor-pointer for better UX
+                card.innerHTML = `
+                    <div class="h-full bg-white rounded-2xl">
+                        <img src="${dulce.imageUrl}" alt="${dulce.name}" class="w-full card-image" onerror="this.onerror=null; this.src='https://placehold.co/300x220/EEEEEE/BDBDBD?text=Imagen+No+Disponible';">
+                        <div class="p-6 relative z-10">
+                            <h3 class="text-2xl font-bold mb-2 text-amber-900">${dulce.name}</h3>
+                            <p class="text-gray-600 mb-4 text-sm">${dulce.description.substring(0, 80)}...</p> 
+                            <span class="btn-primary text-white py-2 px-4 rounded-lg font-medium text-xs inline-block"> 
+                                Ver Detalles <i class="fas fa-arrow-right ml-1"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                // Add click listener to show modal with dulce details
+                card.addEventListener('click', () => showModal(dulce));
+                grid.appendChild(card);
+            });
+
+            // Modal elements
+            const modal = document.getElementById('modal');
+            const closeModalButton = document.getElementById('close-modal');
+            const modalImage = document.getElementById('modal-image');
+            
+            // Elements for AI-powered suggestions in the modal
+            const geminiSuggestionButton = document.getElementById('gemini-suggestion-button');
+            const geminiLoader = document.getElementById('gemini-loader');
+            const geminiSuggestionsDiv = document.getElementById('gemini-suggestions');
+
+            const geminiLegendButton = document.getElementById('gemini-legend-button');
+            const geminiLegendLoader = document.getElementById('gemini-legend-loader');
+            const geminiLegendDiv = document.getElementById('gemini-legend');
+
+            // Elements for AI-powered gift basket name generation
+            const generateBasketNameButton = document.getElementById('generate-basket-name-button');
+            const basketNameKeywordsInput = document.getElementById('gift-basket-keywords');
+            const basketNameLoader = document.getElementById('basket-name-loader');
+            const basketNameSuggestionsDiv = document.getElementById('basket-name-suggestions');
+
+            // Elements for AI-powered thematic basket content suggestion
+            const suggestBasketContentButton = document.getElementById('suggest-basket-content-button');
+            const thematicBasketThemeInput = document.getElementById('thematic-basket-theme');
+            const thematicBasketLoader = document.getElementById('thematic-basket-loader');
+            const thematicBasketSuggestionsDiv = document.getElementById('thematic-basket-suggestions');
+            
+            // Function to show the modal with details of a selected dulce
+            const showModal = (dulce) => {
+                currentDulceForGemini = dulce; // Store for AI features
+                modalImage.src = dulce.imageUrl; 
+                modalImage.alt = `[Imagen de ${dulce.name}]`;
+                document.getElementById('modal-title').textContent = dulce.name;
+                document.getElementById('modal-description').textContent = dulce.description;
+                document.getElementById('modal-appeal').textContent = dulce.appeal;
+                document.getElementById('modal-presentation').textContent = dulce.presentation;
+                
+                // Reset AI suggestion areas
+                geminiSuggestionsDiv.classList.add('hidden');
+                geminiSuggestionsDiv.innerHTML = '';
+                geminiLegendDiv.classList.add('hidden');
+                geminiLegendDiv.innerHTML = '';
+
+                modal.classList.add('active'); // Show the modal
+                document.body.style.overflow = 'hidden'; // Prevent background scroll when modal is open
+            };
+
+            // Function to hide the modal
+            const hideModal = () => {
+                modal.classList.remove('active');
+                document.body.style.overflow = ''; // Restore background scroll
+            };
+
+            // Event listeners for closing the modal
+            closeModalButton.addEventListener('click', hideModal);
+            modal.addEventListener('click', (event) => { // Close if clicked outside the content
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+            document.addEventListener('keydown', (event) => { // Close with Escape key
+                if (event.key === 'Escape' && modal.classList.contains('active')) {
+                    hideModal();
+                }
+            });
+
+            // Simulated function to call a Gemini-like API
+            async function callGeminiAPI(prompt, loaderElement, outputElement, errorMessage) {
+                loaderElement.classList.remove('hidden'); // Show loader
+                outputElement.classList.add('hidden');    // Hide previous output
+                outputElement.innerHTML = '';
+            
+                try {
+                    // Simulate API call delay
+                    await new Promise(resolve => setTimeout(resolve, 1500)); 
+                    
+                    let responseText = '';
+                    // Generate simulated responses based on the prompt type
+                    if (prompt.includes("maridajes")) {
+                        responseText = `<strong>Maridajes Sugeridos (Simulación):</strong><br>
+                        - Para <i>${currentDulceForGemini.name}</i>: Un café de olla caliente o un vaso de leche fría.<br>
+                        - Como postre después de una comida tradicional sonorense.<br><br>
+                        <strong>Ocasiones Ideales (Simulación):</strong><br>
+                        - Reuniones familiares y fiestas.<br>
+                        - Para regalar un detalle auténtico de Sonora.`;
+                    } 
+                    else if (prompt.includes("leyenda")) {
+                         responseText = `<strong>Leyenda de ${currentDulceForGemini.name} (Simulación):</strong><br>
+                         Se cuenta en los pueblos de Sonora que la receta original de <i>${currentDulceForGemini.name}</i> fue un regalo de los ancestros, quienes mezclaron los ingredientes más puros de la tierra con el calor del desierto y el cariño de las abuelas. Cada bocado es un viaje a esas historias antiguas.`;
+                    }
+                    else if (prompt.includes("nombres creativos")) {
+                        const kw = prompt.split(":").pop().trim(); // Extract keywords
+                        responseText = `<strong>Nombres para Canasta (Simulación para "${kw || "ocasión especial"}"):</strong><br>
+                        1. Tesoro Dulce de ${kw || "Sonora"}<br>
+                        2. El Sabor de ${kw ? kw.split(',')[0] : "la Tradición"}<br>
+                        3. Canasta "Corazón Sonorense"<br>
+                        4. Delicias Artesanales para ${kw || "Compartir"}<br>
+                        5. Momento Dulce de ${kw || "Felicidad"}`;
+                    }
+                    else if (prompt.includes("dulces incluir")) {
+                        const th = prompt.split(":").pop().trim(); // Extract theme
+                        responseText = `<strong>Sugerencias para Canasta "${th || "Especial"}" (Simulación):</strong><br>
+                        - <strong>Coricos:</strong> Para un toque suave y tradicional.<br>
+                        - <strong>Coyotas:</strong> El emblema de Sonora, ¡imprescindible!<br>
+                        - <strong>Pipitorias:</strong> Para energía y un crunch delicioso.<br>
+                        - <strong>Ponteduros:</strong> Si la ocasión es festiva y alegre.`;
+                    }
+                    else {
+                        responseText = "Sugerencia generada por nuestra IA (simulada) para este dulce especial.";
+                    }
+                    
+                    outputElement.innerHTML = responseText; // Display the response
+                } catch (error) {
+                    console.error('Error en simulación de API:', error);
+                    outputElement.textContent = errorMessage || 'Hubo un problema al generar la respuesta. Intenta de nuevo más tarde.';
+                } finally {
+                    loaderElement.classList.add('hidden'); // Hide loader
+                    outputElement.classList.remove('hidden'); // Show output
+                }
+            }
+
+            // Event listener for "Sugerir Maridaje y Ocasión" button in modal
+            geminiSuggestionButton.addEventListener('click', () => {
+                if (!currentDulceForGemini) return;
+                geminiLegendDiv.classList.add('hidden'); // Hide legend if open
+                const prompt = `Sugiere maridajes y ocasiones para ${currentDulceForGemini.name}`;
+                callGeminiAPI(prompt, geminiLoader, geminiSuggestionsDiv, 'No se pudieron obtener sugerencias en este momento.');
+            });
+
+            // Event listener for "Descubre la Leyenda" button in modal
+            geminiLegendButton.addEventListener('click', () => {
+                if (!currentDulceForGemini) return;
+                geminiSuggestionsDiv.classList.add('hidden'); // Hide suggestions if open
+                const prompt = `Genera una leyenda para ${currentDulceForGemini.name}`;
+                callGeminiAPI(prompt, geminiLegendLoader, geminiLegendDiv, 'No se pudo encontrar una leyenda para este dulce en este momento.');
+            });
+
+            // Event listener for "Generar Nombres para Canasta" button
+            generateBasketNameButton.addEventListener('click', () => {
+                const keywords = basketNameKeywordsInput.value.trim();
+                if (!keywords) {
+                    basketNameSuggestionsDiv.innerHTML = '<p class="text-red-600 p-4">Por favor, ingresa algunas palabras clave.</p>';
+                    basketNameSuggestionsDiv.classList.remove('hidden');
+                    return;
+                }
+                const prompt = `Sugiere nombres creativos para canasta basados en: ${keywords}`;
+                callGeminiAPI(prompt, basketNameLoader, basketNameSuggestionsDiv, 'No se pudieron generar nombres en este momento.');
+            });
+
+            // Event listener for "Sugerir Dulces para Canasta" (thematic) button
+            suggestBasketContentButton.addEventListener('click', () => {
+                const theme = thematicBasketThemeInput.value.trim();
+                if (!theme) {
+                    thematicBasketSuggestionsDiv.innerHTML = '<p class="text-red-600 p-4">Por favor, describe el tema u ocasión para tu canasta.</p>';
+                    thematicBasketSuggestionsDiv.classList.remove('hidden');
+                    return;
+                }
+                const prompt = `Sugiere dulces incluir en una canasta temática para: ${theme}`;
+                callGeminiAPI(prompt, thematicBasketLoader, thematicBasketSuggestionsDiv, 'No se pudieron sugerir dulces para este tema en este momento.');
+            });
+
+            // Setup for the Chart.js radar chart
+            const ctx = document.getElementById('dulcesChart').getContext('2d');
+            const chartData = {
+                labels: ['Crujiente', 'Suave', 'Intensidad Dulce', 'Tradicional', 'Textura Chiclosa'],
+                datasets: dulcesData.map((dulce, index) => {
+                    // Define color palettes for chart datasets
+                    const colors = [
+                        'rgba(180, 83, 9, 0.6)', 'rgba(217, 119, 6, 0.6)', 'rgba(245, 158, 11, 0.6)',
+                        'rgba(234, 179, 8, 0.6)', 'rgba(202, 138, 4, 0.6)', 'rgba(161, 98, 7, 0.6)', 
+                        'rgba(146, 64, 14, 0.6)'    
+                    ];
+                    const borderColors = [
+                        'rgb(180, 83, 9)', 'rgb(217, 119, 6)', 'rgb(245, 158, 11)',
+                        'rgb(234, 179, 8)', 'rgb(202, 138, 4)', 'rgb(161, 98, 7)',
+                        'rgb(146, 64, 14)'
+                    ];
+                    return {
+                        label: dulce.name, 
+                        data: Object.values(dulce.scores), // Get scores for the dulce
+                        backgroundColor: colors[index % colors.length], 
+                        borderColor: borderColors[index % borderColors.length],
+                        borderWidth: 2, 
+                        pointBackgroundColor: borderColors[index % borderColors.length],
+                        pointRadius: 4,
+                        pointHoverRadius: 7, 
+                        tension: 0.1 // Slight curve to lines
+                    }
+                })
+            };
+
+            // Create the radar chart instance
+            new Chart(ctx, {
+                type: 'radar', 
+                data: chartData,
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'top', 
+                            labels: { 
+                                font: { size: 11, family: 'Poppins' }, 
+                                color: '#4E443A', // var(--dark)
+                                usePointStyle: true,
+                                padding: 15
+                            } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { // Custom tooltip label
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.r !== null) { label += context.parsed.r + ' / 5'; }
+                                    return label;
+                                }
+                            },
+                            titleFont: { family: 'Poppins', weight: 'bold'}, 
+                            bodyFont: { family: 'Poppins'},
+                            padding: 10,
+                            backgroundColor: 'rgba(253, 251, 245, 0.95)', // var(--light) with opacity
+                            titleColor: '#4E443A', // var(--dark)
+                            bodyColor: '#4E443A', // var(--dark)
+                            borderColor: 'rgba(180, 83, 9, 0.3)', // var(--primary) with opacity
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        r: { // Radial axis configuration
+                            angleLines: { color: 'rgba(78, 68, 58, 0.15)' }, 
+                            grid: { color: 'rgba(78, 68, 58, 0.15)' },
+                            pointLabels: { 
+                                font: { size: 12, family: 'Poppins', weight: '500' }, 
+                                color: '#4E443A', // var(--dark)
+                                padding: 5
+                            },
+                            ticks: { 
+                                beginAtZero: true, 
+                                max: 5, 
+                                stepSize: 1, 
+                                backdropColor: 'transparent', 
+                                color: '#78716c', // Tailwind gray-500
+                                font: {family: 'Poppins', size: 10},
+                                z: 1 // Ensure ticks are above grid lines
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Functionality for copying phone number to clipboard
+            const copyButton = document.getElementById('copy-button');
+            const phoneNumberText = document.getElementById('phone-number-text').textContent;
+            const feedback = document.getElementById('copy-feedback');
+
+            copyButton.addEventListener('click', () => {
+                // Attempt to use navigator.clipboard.writeText (modern API)
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(phoneNumberText).then(() => {
+                        feedback.textContent = '¡Teléfono copiado!';
+                        feedback.classList.remove('text-red-500');
+                        feedback.classList.add('text-amber-200');
+                    }).catch(err => {
+                        fallbackCopyTextToClipboard(phoneNumberText, feedback); // Fallback if promise rejected
+                        console.error('Error al copiar con navigator.clipboard: ', err);
+                    });
+                } else {
+                    fallbackCopyTextToClipboard(phoneNumberText, feedback); // Fallback for older browsers
+                }
+                setTimeout(() => { feedback.textContent = ''; }, 3000); // Clear feedback message
+            });
+
+            // Fallback function for copying text to clipboard (for older browsers or restricted environments)
+            function fallbackCopyTextToClipboard(text, feedbackElement) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        feedbackElement.textContent = '¡Teléfono copiado!';
+                        feedbackElement.classList.remove('text-red-500');
+                        feedbackElement.classList.add('text-amber-200');
+                    } else {
+                        feedbackElement.textContent = 'Error al copiar (fallback).';
+                        feedbackElement.classList.remove('text-amber-200');
+                        feedbackElement.classList.add('text-red-500');
+                    }
+                } catch (err) {
+                    feedbackElement.textContent = 'Error al copiar (fallback exception).';
+                    feedbackElement.classList.remove('text-amber-200');
+                    feedbackElement.classList.add('text-red-500');
+                    console.error('Error al copiar teléfono con fallback: ', err);
+                }
+                document.body.removeChild(textArea);
+            }
+
+
+            // Smooth scroll functionality for all anchor links starting with '#'
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+
+                    // Check if the href is more than just "#" (e.g., "#section1")
+                    if (targetId && targetId.length > 1) {
+                        try {
+                            const targetElement = document.querySelector(targetId);
+                            if (targetElement) {
+                                e.preventDefault(); // Prevent default jump only if we found a target and are scrolling
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth'
+                                });
+                            } else {
+                                // Optional: Log if a target for a specific ID isn't found, default browser behavior will apply
+                                // console.warn(`Smooth scroll: Target element for selector '${targetId}' not found.`);
+                            }
+                        } catch (error) {
+                            // This catch block handles errors if targetId is a malformed selector,
+                            // though the original error was specifically for targetId === "#".
+                            console.error(`Smooth scroll: Error with selector '${targetId}'.`, error);
+                        }
+                    } else if (targetId === '#') {
+                        // For links that are just href="#", prevent the default jump.
+                        // Optionally, scroll to the top smoothly.
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // console.log("Smooth scroll: href='#' clicked, scrolling to top.");
+                    }
+                    // If targetId is null, empty, or not handled above,
+                    // e.preventDefault() hasn't been called, so default browser behavior for the link will apply.
+                });
+            });
+        });
+    </script>
+</body>
+</html>
